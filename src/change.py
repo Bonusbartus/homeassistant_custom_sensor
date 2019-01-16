@@ -78,7 +78,7 @@ def calc_accu_delta(new_delta, old_accu):
         if old_accu == STATE_UNKNOWN:
             val = float(new_delta)
         else:
-          val = float(old_accu) + float(delta)
+          val = float(old_accu) + float(new_delta)
     return val
 
 
@@ -136,10 +136,12 @@ class ChangeSensor(Entity):
 
             try:
                 self.current_state = new_state.state
+                _LOGGER.info("new state state: %s ",
+                                self.current_state)
 
             except ValueError:
                 _LOGGER.warning("Unable to store state. "
-                                "Only numerical states are supported")
+                                "Only states are supported")
 
             hass.async_add_job(self.async_update_ha_state, True)
 
@@ -175,7 +177,7 @@ class ChangeSensor(Entity):
                 hass, entity_ids[self.binary_sensor], async_change_sensor_state_listener_enable)
 
             async_track_state_change(
-                hass, entity_ids[self.binary_sensor - 1], async_change_sensor_state_listener)
+                hass, entity_ids[1 - self.binary_sensor], async_change_sensor_state_listener)
         else:
             async_track_state_change(
                 hass, entity_ids[0], async_change_sensor_state_listener)
@@ -242,15 +244,15 @@ class ChangeSensor(Entity):
             self.prev_value = self.current_value
 
         if self.last_state == STATE_UNKNOWN:
-            self.last_state = False
+            self.last_state = 'off'
 
         if self.updatestate == 0:
             """Update the accumulator and internal states """
             if self.binary_sensor >= 0:
-                if self.current_state == False and self.last_state == True:
+                if self.current_state == 'off' and self.last_state == 'on':
                     self.accu = calc_accu_delta(calc_delta(self.current_value, self.prev_value), self.accu)
 
-                elif self.current_state == True and self.last_state == False:
+                elif self.current_state == 'on' and self.last_state == 'off':
                     self.prev_value = self.current_value
 
                 self.last_state = self.current_state
@@ -258,10 +260,10 @@ class ChangeSensor(Entity):
         else:
             """Update the state at every interval"""
             if self.binary_sensor >= 0:
-                if self.current_state == True:
+                if self.current_state == 'on':
                     self.delta = calc_accu_delta(calc_delta(self.current_value, self.prev_value), self.accu)
 
-                elif self.current_state == False:
+                elif self.current_state == 'off':
                     self.delta = self.accu
 
             else:
