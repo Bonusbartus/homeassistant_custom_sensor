@@ -1,0 +1,8 @@
+{
+  "domain": "change",
+  "name": "change",
+  "documentation": "https://github.com/Bonusbartus/homeassistant_custom_sensor",
+  "dependencies": [],
+  "codeowners": ["Bonusbartus"],
+  "requirements": []
+}
